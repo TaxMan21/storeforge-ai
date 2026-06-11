@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { getAuthPayload } from "@/lib/auth";
+import { requirePaidPlan, AuthError } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { ok, fail, serverError } from "@/lib/api/response";
 
@@ -11,10 +12,12 @@ export async function GET(
     const payload = await getAuthPayload();
     if (!payload) return fail("Unauthorized", 401);
 
+    const { user } = await requirePaidPlan(payload);
+
     const { id } = await params;
 
     const project = await prisma.storeProject.findFirst({
-      where: { id, userId: payload.sub },
+      where: { id, userId: user.id },
       include: {
         questionnaireAnswers: true,
         selectedProducts: {
@@ -33,6 +36,7 @@ export async function GET(
 
     return ok({ project });
   } catch (error) {
+    if (error instanceof AuthError) return fail(error.message, error.status);
     console.error("[StoreProjects/[id]]", error);
     return serverError();
   }
@@ -46,11 +50,13 @@ export async function PATCH(
     const payload = await getAuthPayload();
     if (!payload) return fail("Unauthorized", 401);
 
+    const { user } = await requirePaidPlan(payload);
+
     const { id } = await params;
     const body = await request.json();
 
     const project = await prisma.storeProject.findFirst({
-      where: { id, userId: payload.sub },
+      where: { id, userId: user.id },
     });
 
     if (!project) return fail("Project not found", 404);
@@ -70,6 +76,7 @@ export async function PATCH(
 
     return ok({ project: updated });
   } catch (error) {
+    if (error instanceof AuthError) return fail(error.message, error.status);
     console.error("[StoreProjects/[id]/PATCH]", error);
     return serverError();
   }
@@ -83,10 +90,12 @@ export async function DELETE(
     const payload = await getAuthPayload();
     if (!payload) return fail("Unauthorized", 401);
 
+    const { user } = await requirePaidPlan(payload);
+
     const { id } = await params;
 
     const project = await prisma.storeProject.findFirst({
-      where: { id, userId: payload.sub },
+      where: { id, userId: user.id },
     });
 
     if (!project) return fail("Project not found", 404);
@@ -95,6 +104,7 @@ export async function DELETE(
 
     return ok({ message: "Project deleted" });
   } catch (error) {
+    if (error instanceof AuthError) return fail(error.message, error.status);
     console.error("[StoreProjects/[id]/DELETE]", error);
     return serverError();
   }

@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { getAuthPayload } from "@/lib/auth";
+import { requirePaidPlan, AuthError } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { ok, fail, serverError } from "@/lib/api/response";
 import { pageUpdateSchema } from "@/lib/validation";
@@ -21,13 +22,15 @@ export async function POST(request: NextRequest) {
     const payload = await getAuthPayload();
     if (!payload) return fail("Unauthorized", 401);
 
+    const { user } = await requirePaidPlan(payload);
+
     const body = await request.json();
     const { storeProjectId } = body;
 
     if (!storeProjectId) return fail("storeProjectId is required");
 
     const project = await prisma.storeProject.findFirst({
-      where: { id: storeProjectId, userId: payload.sub },
+      where: { id: storeProjectId, userId: user.id },
     });
     if (!project) return fail("Project not found", 404);
 
@@ -62,6 +65,7 @@ export async function POST(request: NextRequest) {
 
     return ok({ pages: allPages });
   } catch (error) {
+    if (error instanceof AuthError) return fail(error.message, error.status);
     console.error("[Pages/POST]", error);
     return serverError();
   }
@@ -72,12 +76,14 @@ export async function GET(request: NextRequest) {
     const payload = await getAuthPayload();
     if (!payload) return fail("Unauthorized", 401);
 
+    const { user } = await requirePaidPlan(payload);
+
     const url = new URL(request.url);
     const storeProjectId = url.searchParams.get("storeProjectId");
     if (!storeProjectId) return fail("storeProjectId is required");
 
     const project = await prisma.storeProject.findFirst({
-      where: { id: storeProjectId, userId: payload.sub },
+      where: { id: storeProjectId, userId: user.id },
     });
     if (!project) return fail("Project not found", 404);
 
@@ -88,6 +94,7 @@ export async function GET(request: NextRequest) {
 
     return ok({ pages });
   } catch (error) {
+    if (error instanceof AuthError) return fail(error.message, error.status);
     console.error("[Pages/GET]", error);
     return serverError();
   }

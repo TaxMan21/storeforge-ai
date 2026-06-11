@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { getAuthPayload } from "@/lib/auth";
+import { requirePaidPlan, AuthError } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { ok, fail, serverError } from "@/lib/api/response";
 
@@ -8,13 +9,15 @@ export async function POST(request: NextRequest) {
     const payload = await getAuthPayload();
     if (!payload) return fail("Unauthorized", 401);
 
+    const { user } = await requirePaidPlan(payload);
+
     const body = await request.json();
     const { storeProjectId } = body;
 
     if (!storeProjectId) return fail("storeProjectId is required");
 
     const project = await prisma.storeProject.findFirst({
-      where: { id: storeProjectId, userId: payload.sub },
+      where: { id: storeProjectId, userId: user.id },
       include: {
         questionnaireAnswers: true,
         selectedProducts: true,
@@ -68,6 +71,7 @@ export async function POST(request: NextRequest) {
       overallScore: Math.round(overallScore),
     });
   } catch (error) {
+    if (error instanceof AuthError) return fail(error.message, error.status);
     console.error("[Optimization/POST]", error);
     return serverError();
   }
@@ -77,6 +81,8 @@ export async function GET(request: NextRequest) {
   try {
     const payload = await getAuthPayload();
     if (!payload) return fail("Unauthorized", 401);
+
+    const { user } = await requirePaidPlan(payload);
 
     const url = new URL(request.url);
     const storeProjectId = url.searchParams.get("storeProjectId");
@@ -94,6 +100,7 @@ export async function GET(request: NextRequest) {
 
     return ok({ scores, overallScore: Math.round(overallScore) });
   } catch (error) {
+    if (error instanceof AuthError) return fail(error.message, error.status);
     console.error("[Optimization/GET]", error);
     return serverError();
   }

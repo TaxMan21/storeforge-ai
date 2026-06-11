@@ -19,6 +19,8 @@ import {
   ChevronRight,
   Play,
   ExternalLink,
+  Lock,
+  Crown,
 } from "lucide-react";
 
 export default function StoreDetailPage() {
@@ -27,13 +29,19 @@ export default function StoreDetailPage() {
   const id = params.id as string;
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [needsUpgrade, setNeedsUpgrade] = useState(false);
 
   useEffect(() => {
     async function load() {
       try {
         const data = await apiGet(`/api/store-projects/${id}`);
         setProject(data.project);
-      } catch {
+      } catch (err: any) {
+        if (err?.status === 403) {
+          setNeedsUpgrade(true);
+          setLoading(false);
+          return;
+        }
         router.push("/dashboard/stores");
       }
       setLoading(false);
@@ -46,6 +54,34 @@ export default function StoreDetailPage() {
       <div className="space-y-4">
         <div className="h-8 w-48 bg-gray-200 rounded animate-pulse" />
         <div className="h-64 bg-gray-200 rounded-xl animate-pulse" />
+      </div>
+    );
+  }
+
+  if (needsUpgrade) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <Card className="max-w-md w-full">
+          <CardContent className="flex flex-col items-center text-center py-12 px-6">
+            <div className="h-16 w-16 rounded-full bg-indigo-100 flex items-center justify-center mb-6">
+              <Crown className="h-8 w-8 text-indigo-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Upgrade to Access Your Store</h2>
+            <p className="text-gray-500 mb-6">
+              A paid plan is required to view, edit, and publish your store. Choose a plan that fits your needs.
+            </p>
+            <div className="flex gap-3">
+              <Link href="/dashboard/billing">
+                <Button className="gap-2">
+                  <Crown className="h-4 w-4" /> View Plans
+                </Button>
+              </Link>
+              <Link href="/dashboard/stores">
+                <Button variant="outline">Back to Stores</Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }

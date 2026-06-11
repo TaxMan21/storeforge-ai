@@ -1,13 +1,16 @@
 import { NextRequest } from "next/server";
 import { getAuthPayload } from "@/lib/auth";
+import { requirePaidPlan, AuthError } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
-import { ok, fail, serverError } from "@/lib/api/response";
 import { researchProducts } from "@/lib/ai/product-research";
+import { ok, fail, serverError } from "@/lib/api/response";
 
 export async function POST(request: NextRequest) {
   try {
     const payload = await getAuthPayload();
     if (!payload) return fail("Unauthorized", 401);
+
+    const { user } = await requirePaidPlan(payload);
 
     const body = await request.json();
     const { storeProjectId } = body;
@@ -15,7 +18,7 @@ export async function POST(request: NextRequest) {
     if (!storeProjectId) return fail("storeProjectId is required");
 
     const project = await prisma.storeProject.findFirst({
-      where: { id: storeProjectId, userId: payload.sub },
+      where: { id: storeProjectId, userId: user.id },
       include: { questionnaireAnswers: true },
     });
 
@@ -90,6 +93,7 @@ export async function POST(request: NextRequest) {
 
     return ok({ products: created });
   } catch (error) {
+    if (error instanceof AuthError) return fail(error.message, error.status);
     console.error("[Products/Research]", error);
     return serverError();
   }
@@ -99,6 +103,8 @@ export async function GET(request: NextRequest) {
   try {
     const payload = await getAuthPayload();
     if (!payload) return fail("Unauthorized", 401);
+
+    const { user } = await requirePaidPlan(payload);
 
     const url = new URL(request.url);
     const nicheId = url.searchParams.get("nicheId");
@@ -111,7 +117,7 @@ export async function GET(request: NextRequest) {
       where.nicheId = nicheId;
     } else if (storeProjectId) {
       const project = await prisma.storeProject.findFirst({
-        where: { id: storeProjectId, userId: payload.sub },
+        where: { id: storeProjectId, userId: user.id },
         include: { questionnaireAnswers: true },
       });
       if (project) {
@@ -133,6 +139,7 @@ export async function GET(request: NextRequest) {
 
     return ok({ products });
   } catch (error) {
+    if (error instanceof AuthError) return fail(error.message, error.status);
     console.error("[Products/GET]", error);
     return serverError();
   }
