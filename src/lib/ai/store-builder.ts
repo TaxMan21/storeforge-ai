@@ -44,21 +44,25 @@ export interface StoreBlueprint {
 export async function generateBlueprint(
   answers: QuestionnaireAnswer[]
 ): Promise<StoreBlueprint> {
-  const answersText = answers
-    .map((a) => `${a.questionText}: ${JSON.stringify(a.answerValue)}`)
-    .join("\n");
-
-  const result = await runAgent(
-    "store_strategy",
-    `Based on these questionnaire answers, generate a complete store blueprint as JSON. Include store name, logo concept, brand colors (hex), font pairing, homepage sections, page slugs, recommended integrations, and product strategy.\n\n${answersText}`,
-    { answers }
-  );
-
   try {
-    const jsonMatch = result.content.match(/```json\s*([\s\S]*?)\s*```/);
-    const raw = jsonMatch ? jsonMatch[1] : result.content;
-    const cleaned = raw.replace(/^[^{[]*/, "").replace(/[^}\]]*$/, "");
-    return JSON.parse(cleaned) as StoreBlueprint;
+    const answersText = answers
+      .map((a) => `${a.questionText}: ${JSON.stringify(a.answerValue)}`)
+      .join("\n");
+
+    const result = await runAgent(
+      "store_strategy",
+      `Based on these questionnaire answers, generate a complete store blueprint as JSON. Include store name, logo concept, brand colors (hex), font pairing, homepage sections, page slugs, recommended integrations, and product strategy.\n\n${answersText}`,
+      { answers }
+    );
+
+    try {
+      const jsonMatch = result.content.match(/```json\s*([\s\S]*?)\s*```/);
+      const raw = jsonMatch ? jsonMatch[1] : result.content;
+      const cleaned = raw.replace(/^[^{[]*/, "").replace(/[^}\]]*$/, "");
+      return JSON.parse(cleaned) as StoreBlueprint;
+    } catch {
+      return getDefaultBlueprint(answers);
+    }
   } catch {
     return getDefaultBlueprint(answers);
   }

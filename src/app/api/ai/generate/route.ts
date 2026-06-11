@@ -70,7 +70,16 @@ export async function POST(request: NextRequest) {
     };
 
     const startTime = Date.now();
-    const result = await runAgent(agentType as any, prompt, context);
+    let result;
+    try {
+      result = await runAgent(agentType as any, prompt, context);
+    } catch {
+      result = {
+        content: `AI generation is temporarily unavailable. Your request for "${agentType}" has been noted. Please try again in a few minutes.`,
+        tokens: 0,
+        model: "unavailable",
+      };
+    }
     const duration = Date.now() - startTime;
 
     await prisma.aIUsageLog.create({
