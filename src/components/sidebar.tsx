@@ -16,6 +16,7 @@ import {
   Sparkles,
   ChevronLeft,
   ChevronRight,
+  Zap,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -41,28 +42,33 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "flex flex-col h-screen border-r border-gray-200 bg-white transition-all duration-300",
-        collapsed ? "w-16" : "w-64"
+        "flex flex-col h-screen transition-all duration-300 bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 border-r border-white/5",
+        collapsed ? "w-20" : "w-64"
       )}
     >
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+      {/* Logo */}
+      <div className="flex items-center justify-between p-4 border-b border-white/5">
         {!collapsed && (
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center">
+          <Link href="/dashboard" className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
               <Sparkles className="h-5 w-5 text-white" />
             </div>
-            <span className="font-bold text-gray-900">StoreForge</span>
+            <div>
+              <span className="font-bold text-white text-lg">StoreForge</span>
+              <span className="block text-[10px] text-indigo-400 font-medium -mt-0.5">AI Platform</span>
+            </div>
           </Link>
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="p-1 rounded hover:bg-gray-100 text-gray-500"
+          className="p-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors"
         >
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </button>
       </div>
 
-      <nav className="flex-1 overflow-y-auto p-2 space-y-1">
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto p-3 space-y-1">
         {navItems.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
           return (
@@ -70,15 +76,18 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
                 isActive
-                  ? "bg-indigo-50 text-indigo-700"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  ? "bg-gradient-to-r from-indigo-500/20 to-purple-500/10 text-white shadow-lg shadow-indigo-500/10"
+                  : "text-gray-400 hover:text-white hover:bg-white/5"
               )}
               title={collapsed ? item.label : undefined}
             >
-              <item.icon className="h-5 w-5 flex-shrink-0" />
+              <item.icon className={cn("h-5 w-5 flex-shrink-0", isActive && "text-indigo-400")} />
               {!collapsed && <span>{item.label}</span>}
+              {isActive && !collapsed && (
+                <div className="ml-auto h-1.5 w-1.5 rounded-full bg-indigo-400" />
+              )}
             </Link>
           );
         })}
@@ -86,7 +95,9 @@ export function Sidebar() {
         {user?.role === "ADMIN" && (
           <>
             <div className="pt-4 pb-2 px-3">
-              {!collapsed && <p className="text-xs font-semibold text-gray-400 uppercase">Admin</p>}
+              {!collapsed && (
+                <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Admin</p>
+              )}
             </div>
             {adminItems.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
@@ -95,14 +106,14 @@ export function Sidebar() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                    "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
                     isActive
-                      ? "bg-red-50 text-red-700"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      ? "bg-gradient-to-r from-red-500/20 to-orange-500/10 text-white shadow-lg shadow-red-500/10"
+                      : "text-gray-400 hover:text-white hover:bg-white/5"
                   )}
                   title={collapsed ? item.label : undefined}
                 >
-                  <item.icon className="h-5 w-5 flex-shrink-0" />
+                  <item.icon className={cn("h-5 w-5 flex-shrink-0", isActive && "text-red-400")} />
                   {!collapsed && <span>{item.label}</span>}
                 </Link>
               );
@@ -111,16 +122,42 @@ export function Sidebar() {
         )}
       </nav>
 
-      <div className="border-t border-gray-200 p-3 space-y-1">
+      {/* Upgrade CTA */}
+      {!collapsed && user?.subscription?.plan === "FREE" && (
+        <div className="mx-3 mb-3">
+          <Link href="/dashboard/billing">
+            <div className="rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 p-4 cursor-pointer hover:from-indigo-600 hover:to-purple-700 transition-all shadow-lg shadow-indigo-500/25">
+              <div className="flex items-center gap-2 mb-2">
+                <Zap className="h-4 w-4 text-yellow-300" />
+                <span className="text-sm font-bold text-white">Upgrade to Pro</span>
+              </div>
+              <p className="text-xs text-white/70">Unlock all AI agents and premium features.</p>
+            </div>
+          </Link>
+        </div>
+      )}
+
+      {/* User section */}
+      <div className="border-t border-white/5 p-3 space-y-1">
         {!collapsed && user && (
-          <div className="px-3 py-2">
-            <p className="text-sm font-medium text-gray-900 truncate">{user.name || user.email}</p>
-            <p className="text-xs text-gray-500 truncate">{user.email}</p>
+          <div className="px-3 py-2 mb-2">
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                {(user.name || user.email || "U")[0].toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-white truncate">{user.name || "User"}</p>
+                <p className="text-xs text-gray-400 truncate">{user.email}</p>
+              </div>
+            </div>
           </div>
         )}
         <button
           onClick={logout}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+          className={cn(
+            "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+            "text-gray-400 hover:text-white hover:bg-white/5"
+          )}
           title={collapsed ? "Sign out" : undefined}
         >
           <LogOut className="h-5 w-5 flex-shrink-0" />
