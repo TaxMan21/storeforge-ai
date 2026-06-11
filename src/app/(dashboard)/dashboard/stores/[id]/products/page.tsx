@@ -19,8 +19,14 @@ export default function ProductsPage() {
     let cancelled = false;
     async function load() {
       try {
-        const data = await apiGet(`/api/products/research?limit=20`);
-        if (!cancelled) setCandidates(data.products || []);
+        const [researchData, selectedData] = await Promise.all([
+          apiGet(`/api/products/research?storeProjectId=${id}&limit=20`),
+          apiGet(`/api/products/select?storeProjectId=${id}`),
+        ]);
+        if (!cancelled) {
+          setCandidates(researchData.products || []);
+          setSelectedIds(new Set((selectedData.products || []).map((p: any) => p.productCandidateId).filter(Boolean)));
+        }
       } catch {}
       if (!cancelled) setLoading(false);
     }

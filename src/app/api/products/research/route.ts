@@ -102,10 +102,27 @@ export async function GET(request: NextRequest) {
 
     const url = new URL(request.url);
     const nicheId = url.searchParams.get("nicheId");
+    const storeProjectId = url.searchParams.get("storeProjectId");
     const limit = parseInt(url.searchParams.get("limit") || "20");
 
     const where: any = { isActive: true };
-    if (nicheId) where.nicheId = nicheId;
+
+    if (nicheId) {
+      where.nicheId = nicheId;
+    } else if (storeProjectId) {
+      const project = await prisma.storeProject.findFirst({
+        where: { id: storeProjectId, userId: payload.sub },
+        include: { questionnaireAnswers: true },
+      });
+      if (project) {
+        const niche = project.questionnaireAnswers.find((a) => a.questionKey === "niche")?.answerValue as string;
+        if (niche) {
+          const slug = niche.toLowerCase().replace(/\s+/g, "-");
+          const nicheRecord = await prisma.niche.findUnique({ where: { slug } });
+          if (nicheRecord) where.nicheId = nicheRecord.id;
+        }
+      }
+    }
 
     const products = await prisma.productCandidate.findMany({
       where,
