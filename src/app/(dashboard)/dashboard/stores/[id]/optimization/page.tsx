@@ -66,7 +66,9 @@ export default function OptimizationPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        <div className="relative">
+          <div className="h-10 w-10 rounded-full border-4 border-indigo-200 border-t-indigo-600 animate-spin" />
+        </div>
       </div>
     );
   }
@@ -78,17 +80,18 @@ export default function OptimizationPage() {
           <h1 className="text-3xl font-bold text-gray-900">Optimization Dashboard</h1>
           <p className="text-gray-500 mt-1">Track and improve your store performance.</p>
         </div>
-        <Button onClick={recalculate} disabled={calculating} variant="outline" className="gap-2">
+        <Button onClick={recalculate} disabled={calculating} variant="outline" className="gap-2 rounded-xl">
           <RefreshCw className={`h-4 w-4 ${calculating ? "animate-spin" : ""}`} />
           Recalculate
         </Button>
       </div>
 
-      <Card>
+      <Card className="border-gray-100 overflow-hidden">
+        <div className="h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
         <CardContent className="py-8">
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
-              <div className="h-32 w-32 rounded-full border-8 border-gray-200 flex items-center justify-center">
+              <div className="h-32 w-32 rounded-full border-8 border-gray-100 flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50">
                 <div className="text-center">
                   <p className="text-4xl font-bold text-gray-900">{overall}</p>
                   <p className="text-sm text-gray-500">/ 100</p>
@@ -113,7 +116,7 @@ export default function OptimizationPage() {
           const percentage = Math.round((score.score / score.maxScore) * 100);
 
           return (
-            <Card key={score.category}>
+            <Card key={score.category} className="card-premium border-gray-100">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm flex items-center gap-2">

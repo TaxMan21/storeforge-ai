@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,34 +48,38 @@ export default function AdminUsersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Users className="h-6 w-6 text-red-600" />
-          <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-        </div>
-        <p className="text-sm text-gray-500">{total} total users</p>
-      </div>
-
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            className="pl-9"
-            placeholder="Search users..."
-            value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          />
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center">
+            <Users className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
+            <p className="text-sm text-gray-500">{total} total users</p>
+          </div>
         </div>
       </div>
 
-      <Card>
+      <div className="relative max-w-md">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+        <Input
+          className="pl-12 h-12 rounded-xl"
+          placeholder="Search users..."
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+        />
+      </div>
+
+      <Card className="border-gray-100">
         <CardContent className="p-0">
           {loading ? (
             <div className="py-12 text-center">
-              <div className="animate-spin h-8 w-8 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto" />
+              <div className="h-10 w-10 rounded-full border-4 border-indigo-200 border-t-indigo-600 animate-spin mx-auto" />
               <p className="text-gray-500 mt-4">Loading users...</p>
             </div>
           ) : users.length === 0 ? (
             <div className="py-12 text-center">
-              <Users className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+              <div className="h-16 w-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                <Users className="h-8 w-8 text-gray-400" />
+              </div>
               <p className="text-gray-500">No users found.</p>
             </div>
           ) : (
@@ -92,11 +96,16 @@ export default function AdminUsersPage() {
                 </thead>
                 <tbody>
                   {users.map((user) => (
-                    <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <tr key={user.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4">
-                        <div>
-                          <p className="font-medium text-gray-900">{user.name || "Unnamed"}</p>
-                          <p className="text-sm text-gray-500">{user.email}</p>
+                        <div className="flex items-center gap-3">
+                          <div className="h-9 w-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                            {(user.name || user.email || "U")[0].toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-900">{user.name || "Unnamed"}</p>
+                            <p className="text-sm text-gray-500">{user.email}</p>
+                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -123,14 +132,12 @@ export default function AdminUsersPage() {
 
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-500">
-            Page {page} of {totalPages}
-          </p>
+          <p className="text-sm text-gray-500">Page {page} of {totalPages}</p>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)}>
+            <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)} className="rounded-xl">
               <ChevronLeft className="h-4 w-4" /> Previous
             </Button>
-            <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage(page + 1)}>
+            <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage(page + 1)} className="rounded-xl">
               Next <ChevronRight className="h-4 w-4" />
             </Button>
           </div>

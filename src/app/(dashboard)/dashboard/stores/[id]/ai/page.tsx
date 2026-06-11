@@ -10,15 +10,15 @@ import { apiPost } from "@/lib/api-client";
 import { Loader2, Send, Sparkles, Bot } from "lucide-react";
 
 const AGENTS = [
-  { id: "store_strategy", label: "Store Strategy", color: "bg-blue-100 text-blue-800" },
-  { id: "product_research", label: "Product Research", color: "bg-green-100 text-green-800" },
-  { id: "branding", label: "Branding", color: "bg-purple-100 text-purple-800" },
-  { id: "web_design", label: "Web Design", color: "bg-pink-100 text-pink-800" },
-  { id: "seo", label: "SEO", color: "bg-yellow-100 text-yellow-800" },
-  { id: "conversion", label: "Conversion", color: "bg-orange-100 text-orange-800" },
-  { id: "marketing", label: "Marketing", color: "bg-red-100 text-red-800" },
-  { id: "compliance", label: "Policies & Compliance", color: "bg-gray-100 text-gray-800" },
-  { id: "launch_checklist", label: "Launch Checklist", color: "bg-teal-100 text-teal-800" },
+  { id: "store_strategy", label: "Store Strategy", color: "from-blue-500 to-cyan-500" },
+  { id: "product_research", label: "Product Research", color: "from-green-500 to-emerald-500" },
+  { id: "branding", label: "Branding", color: "from-purple-500 to-pink-500" },
+  { id: "web_design", label: "Web Design", color: "from-pink-500 to-rose-500" },
+  { id: "seo", label: "SEO", color: "from-yellow-500 to-orange-500" },
+  { id: "conversion", label: "Conversion", color: "from-orange-500 to-red-500" },
+  { id: "marketing", label: "Marketing", color: "from-red-500 to-pink-500" },
+  { id: "compliance", label: "Policies & Compliance", color: "from-gray-500 to-slate-600" },
+  { id: "launch_checklist", label: "Launch Checklist", color: "from-teal-500 to-cyan-500" },
 ];
 
 export default function AIStudioPage() {
@@ -68,10 +68,10 @@ export default function AIStudioPage() {
               <button
                 key={agent.id}
                 onClick={() => setSelectedAgent(agent.id)}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                   selectedAgent === agent.id
-                    ? "bg-indigo-600 text-white"
-                    : agent.color + " hover:opacity-80"
+                    ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/25"
+                    : `bg-gradient-to-br ${agent.color} text-white hover:opacity-90`
                 }`}
               >
                 {agent.label}
@@ -95,7 +95,7 @@ export default function AIStudioPage() {
               <p className="text-xs text-gray-400">
                 {tokens > 0 && `${tokens} tokens used`}
               </p>
-              <Button onClick={generate} disabled={loading || !prompt.trim()} className="gap-2">
+              <Button onClick={generate} disabled={loading || !prompt.trim()} className="gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/25 btn-shine">
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 {loading ? "Generating..." : "Generate"}
               </Button>

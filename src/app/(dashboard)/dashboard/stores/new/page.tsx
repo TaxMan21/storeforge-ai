@@ -32,9 +32,9 @@ export default function NewStorePage() {
   }
 
   const platforms = [
-    { id: "SHOPIFY" as const, label: "Shopify", icon: Store, desc: "Most popular platform" },
-    { id: "WOOCOMMERCE" as const, label: "WooCommerce", icon: ShoppingCart, desc: "WordPress-based" },
-    { id: "CUSTOM" as const, label: "Custom Store", icon: Globe, desc: "Build from scratch" },
+    { id: "SHOPIFY" as const, label: "Shopify", icon: Store, desc: "Most popular platform", color: "from-green-500 to-emerald-500" },
+    { id: "WOOCOMMERCE" as const, label: "WooCommerce", icon: ShoppingCart, desc: "WordPress-based", color: "from-purple-500 to-pink-500" },
+    { id: "CUSTOM" as const, label: "Custom Store", icon: Globe, desc: "Build from scratch", color: "from-blue-500 to-cyan-500" },
   ];
 
   const storeTypes = [
@@ -50,12 +50,17 @@ export default function NewStorePage() {
         <p className="text-gray-500 mt-1">Set up your store foundation before the AI builds it.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {error && (
-          <div className="rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-700">{error}</div>
+          <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-700 flex items-center gap-3">
+            <svg className="h-5 w-5 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {error}
+          </div>
         )}
 
-        <Card>
+        <Card className="border-gray-100">
           <CardHeader>
             <CardTitle>Store Name</CardTitle>
             <CardDescription>Choose a memorable name for your store.</CardDescription>
@@ -66,11 +71,12 @@ export default function NewStorePage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               maxLength={100}
+              className="h-12 rounded-xl"
             />
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-gray-100">
           <CardHeader>
             <CardTitle>Platform</CardTitle>
             <CardDescription>Where will your store be hosted?</CardDescription>
@@ -83,14 +89,16 @@ export default function NewStorePage() {
                   type="button"
                   onClick={() => setPlatform(p.id)}
                   className={cn(
-                    "flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all",
+                    "flex flex-col items-center gap-3 rounded-xl border-2 p-5 transition-all",
                     platform === p.id
-                      ? "border-indigo-600 bg-indigo-50"
-                      : "border-gray-200 hover:border-gray-300"
+                      ? "border-indigo-500 bg-indigo-50 shadow-lg shadow-indigo-500/10"
+                      : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                   )}
                 >
-                  <p.icon className="h-8 w-8 text-gray-600" />
-                  <span className="font-medium text-sm">{p.label}</span>
+                  <div className={`h-12 w-12 rounded-xl bg-gradient-to-br ${p.color} flex items-center justify-center text-white`}>
+                    <p.icon className="h-6 w-6" />
+                  </div>
+                  <span className="font-semibold text-sm">{p.label}</span>
                   <span className="text-xs text-gray-500">{p.desc}</span>
                 </button>
               ))}
@@ -98,7 +106,7 @@ export default function NewStorePage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-gray-100">
           <CardHeader>
             <CardTitle>Store Type</CardTitle>
             <CardDescription>How many products will you sell?</CardDescription>
@@ -111,13 +119,13 @@ export default function NewStorePage() {
                   type="button"
                   onClick={() => setStoreType(t.id)}
                   className={cn(
-                    "flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all text-center",
+                    "flex flex-col items-center gap-2 rounded-xl border-2 p-5 transition-all text-center",
                     storeType === t.id
-                      ? "border-indigo-600 bg-indigo-50"
-                      : "border-gray-200 hover:border-gray-300"
+                      ? "border-indigo-500 bg-indigo-50 shadow-lg shadow-indigo-500/10"
+                      : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                   )}
                 >
-                  <span className="font-medium text-sm">{t.label}</span>
+                  <span className="font-semibold text-sm">{t.label}</span>
                   <span className="text-xs text-gray-500">{t.desc}</span>
                 </button>
               ))}
@@ -126,8 +134,8 @@ export default function NewStorePage() {
         </Card>
 
         <div className="flex justify-end gap-4">
-          <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
-          <Button type="submit" size="lg" disabled={loading}>
+          <Button type="button" variant="outline" onClick={() => router.back()} className="rounded-xl">Cancel</Button>
+          <Button type="submit" disabled={loading} className="rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/25 btn-shine px-8">
             {loading ? "Creating..." : "Next: Start Questionnaire"}
           </Button>
         </div>

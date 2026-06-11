@@ -88,7 +88,9 @@ export default function QuestionnairePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        <div className="relative">
+          <div className="h-10 w-10 rounded-full border-4 border-indigo-200 border-t-indigo-600 animate-spin" />
+        </div>
       </div>
     );
   }
@@ -106,7 +108,7 @@ export default function QuestionnairePage() {
           <span>{Math.round(progress)}% complete</span>
         </div>
         <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-          <div className="h-full bg-indigo-600 rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+          <div className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
         </div>
       </div>
 
@@ -114,7 +116,7 @@ export default function QuestionnairePage() {
         <div className="rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-700">{error}</div>
       )}
 
-      <Card>
+      <Card className="border-gray-100">
         <CardHeader>
           <CardTitle>{q.text}</CardTitle>
           {q.required && <CardDescription>* Required</CardDescription>}
@@ -155,9 +157,9 @@ export default function QuestionnairePage() {
                   type="button"
                   onClick={() => updateAnswer(opt)}
                   className={cn(
-                    "rounded-lg border-2 p-3 text-left text-sm transition-all",
+                    "rounded-xl border-2 p-3 text-left text-sm transition-all",
                     answers[q.key] === opt
-                      ? "border-indigo-600 bg-indigo-50 text-indigo-700"
+                      ? "border-indigo-500 bg-indigo-50 text-indigo-700 shadow-md shadow-indigo-500/10"
                       : "border-gray-200 hover:border-gray-300"
                   )}
                 >
@@ -177,7 +179,7 @@ export default function QuestionnairePage() {
           variant="outline"
           onClick={() => setCurrentStep((s) => Math.max(0, s - 1))}
           disabled={currentStep === 0}
-          className="gap-2"
+          className="gap-2 rounded-xl"
         >
           <ChevronLeft className="h-4 w-4" /> Back
         </Button>
@@ -185,7 +187,7 @@ export default function QuestionnairePage() {
           <Button
             onClick={() => setCurrentStep((s) => Math.min(questions.length - 1, s + 1))}
             disabled={q.required && !answers[q.key]}
-            className="gap-2"
+            className="gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/25 btn-shine"
           >
             Next <ChevronRight className="h-4 w-4" />
           </Button>
@@ -193,7 +195,7 @@ export default function QuestionnairePage() {
           <Button
             onClick={handleSubmit}
             disabled={submitting || questions.filter((q) => q.required).some((q) => !answers[q.key])}
-            className="gap-2"
+            className="gap-2 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg shadow-green-500/25 btn-shine"
           >
             {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
             {submitting ? "Generating Blueprint..." : "Generate Blueprint"}
@@ -208,7 +210,7 @@ export default function QuestionnairePage() {
             onClick={() => setCurrentStep(i)}
             className={cn(
               "h-2 w-2 rounded-full transition-all",
-              i === currentStep ? "bg-indigo-600 w-6" : answers[questions[i].key] ? "bg-green-500" : "bg-gray-300"
+              i === currentStep ? "bg-gradient-to-r from-indigo-500 to-purple-500 w-6 shadow-md shadow-indigo-500/30" : answers[questions[i].key] ? "bg-green-500" : "bg-gray-300"
             )}
           />
         ))}

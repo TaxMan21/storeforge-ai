@@ -61,7 +61,7 @@ export default function ProductsPage() {
           <h1 className="text-3xl font-bold text-gray-900">Product Research</h1>
           <p className="text-gray-500 mt-1">Find and select winning products for your store.</p>
         </div>
-        <Button onClick={runResearch} disabled={researching} className="gap-2">
+        <Button onClick={runResearch} disabled={researching} className="gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/25 btn-shine">
           {researching ? <Loader2 className="h-4 w-4 animate-spin" /> : <TrendingUp className="h-4 w-4" />}
           {researching ? "Researching..." : "AI Product Research"}
         </Button>
@@ -70,7 +70,7 @@ export default function ProductsPage() {
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-64 rounded-xl bg-gray-200 animate-pulse" />
+            <div key={i} className="h-64 rounded-2xl bg-gray-100 animate-pulse" />
           ))}
         </div>
       ) : candidates.length === 0 ? (
@@ -85,7 +85,7 @@ export default function ProductsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {candidates.map((product) => (
-            <Card key={product.id} className="hover:shadow-md transition-shadow">
+            <Card key={product.id} className="card-premium border-gray-100">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base leading-tight">{product.name}</CardTitle>
               </CardHeader>
@@ -138,7 +138,7 @@ export default function ProductsPage() {
                       <Check className="h-3.5 w-3.5" /> Selected
                     </Button>
                   ) : (
-                    <Button variant="outline" className="flex-1 gap-1" onClick={() => selectProduct(product)}>
+                    <Button variant="outline" className="flex-1 gap-1 rounded-xl" onClick={() => selectProduct(product)}>
                       <Plus className="h-3.5 w-3.5" /> Select
                     </Button>
                   )}

@@ -62,7 +62,9 @@ export default function IntegrationsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        <div className="relative">
+          <div className="h-10 w-10 rounded-full border-4 border-indigo-200 border-t-indigo-600 animate-spin" />
+        </div>
       </div>
     );
   }
@@ -83,7 +85,7 @@ export default function IntegrationsPage() {
             <h2 className="text-lg font-semibold text-gray-900 mb-3">{catLabel}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {items.map((int) => (
-                <Card key={int.name} className={int.status === "CONNECTED" ? "border-green-200 bg-green-50/30" : ""}>
+                <Card key={int.name} className={`card-premium border-gray-100 ${int.status === "CONNECTED" ? "ring-2 ring-green-500/20" : ""}`}>
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-base">{int.name}</CardTitle>

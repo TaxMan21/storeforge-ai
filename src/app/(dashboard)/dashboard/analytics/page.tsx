@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { apiGet } from "@/lib/api-client";
-import { BarChart3, ShoppingCart, Store, TrendingUp, Users } from "lucide-react";
+import { BarChart3, ShoppingCart, Store, TrendingUp } from "lucide-react";
 
 export default function AnalyticsPage() {
   const [projects, setProjects] = useState<any[]>([]);
@@ -22,6 +21,13 @@ export default function AnalyticsPage() {
   const totalProducts = projects.reduce((sum, p) => sum + (p._count?.selectedProducts || 0), 0);
   const totalIntegrations = projects.reduce((sum, p) => sum + (p._count?.integrations || 0), 0);
 
+  const stats = [
+    { label: "Total Stores", value: projects.length, icon: Store, color: "from-blue-500 to-cyan-500", bgColor: "bg-blue-50" },
+    { label: "Products Selected", value: totalProducts, icon: ShoppingCart, color: "from-green-500 to-emerald-500", bgColor: "bg-green-50" },
+    { label: "Integrations", value: totalIntegrations, icon: BarChart3, color: "from-purple-500 to-pink-500", bgColor: "bg-purple-50" },
+    { label: "Live Stores", value: projects.filter((p) => p.status === "LIVE").length, icon: TrendingUp, color: "from-orange-500 to-red-500", bgColor: "bg-orange-50" },
+  ];
+
   return (
     <div className="space-y-8">
       <div>
@@ -30,58 +36,28 @@ export default function AnalyticsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardContent className="flex items-center gap-4 py-6">
-            <div className="h-12 w-12 rounded-xl bg-indigo-100 flex items-center justify-center">
-              <Store className="h-6 w-6 text-indigo-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{projects.length}</p>
-              <p className="text-sm text-gray-500">Total Stores</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex items-center gap-4 py-6">
-            <div className="h-12 w-12 rounded-xl bg-green-100 flex items-center justify-center">
-              <ShoppingCart className="h-6 w-6 text-green-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{totalProducts}</p>
-              <p className="text-sm text-gray-500">Products Selected</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex items-center gap-4 py-6">
-            <div className="h-12 w-12 rounded-xl bg-purple-100 flex items-center justify-center">
-              <BarChart3 className="h-6 w-6 text-purple-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{totalIntegrations}</p>
-              <p className="text-sm text-gray-500">Integrations</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex items-center gap-4 py-6">
-            <div className="h-12 w-12 rounded-xl bg-orange-100 flex items-center justify-center">
-              <TrendingUp className="h-6 w-6 text-orange-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">
-                {projects.filter((p) => p.status === "LIVE").length}
-              </p>
-              <p className="text-sm text-gray-500">Live Stores</p>
-            </div>
-          </CardContent>
-        </Card>
+        {stats.map((stat, i) => (
+          <Card key={i} className="card-premium border-gray-100">
+            <CardContent className="flex items-center gap-4 py-6">
+              <div className={`h-12 w-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-lg`}>
+                <stat.icon className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+                <p className="text-sm text-gray-500">{stat.label}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      <Card>
-        <CardContent className="py-12 text-center">
-          <BarChart3 className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-          <p className="text-gray-500">Detailed analytics will appear once your stores are live and connected to Google Analytics.</p>
+      <Card className="border-gray-100">
+        <CardContent className="py-16 text-center">
+          <div className="h-16 w-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+            <BarChart3 className="h-8 w-8 text-gray-400" />
+          </div>
+          <p className="text-lg font-semibold text-gray-900 mb-2">Detailed Analytics Coming Soon</p>
+          <p className="text-gray-500 max-w-md mx-auto">Detailed analytics will appear once your stores are live and connected to Google Analytics.</p>
         </CardContent>
       </Card>
     </div>

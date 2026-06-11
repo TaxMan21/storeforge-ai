@@ -50,7 +50,9 @@ export default function BlueprintPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        <div className="relative">
+          <div className="h-10 w-10 rounded-full border-4 border-indigo-200 border-t-indigo-600 animate-spin" />
+        </div>
       </div>
     );
   }
@@ -81,10 +83,12 @@ export default function BlueprintPage() {
         </Badge>
       </div>
 
-      <Card>
+      <Card className="border-gray-100">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Palette className="h-5 w-5 text-indigo-600" />
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center">
+              <Palette className="h-4 w-4 text-white" />
+            </div>
             Brand Identity
           </CardTitle>
         </CardHeader>
@@ -117,10 +121,12 @@ export default function BlueprintPage() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="border-gray-100">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Type className="h-5 w-5 text-indigo-600" />
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+              <Type className="h-4 w-4 text-white" />
+            </div>
             Typography
           </CardTitle>
         </CardHeader>
@@ -142,10 +148,12 @@ export default function BlueprintPage() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="border-gray-100">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Layout className="h-5 w-5 text-indigo-600" />
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+              <Layout className="h-4 w-4 text-white" />
+            </div>
             Homepage Sections
           </CardTitle>
         </CardHeader>
@@ -167,10 +175,12 @@ export default function BlueprintPage() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="border-gray-100">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <ShoppingCart className="h-5 w-5 text-indigo-600" />
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
+              <ShoppingCart className="h-4 w-4 text-white" />
+            </div>
             Product Strategy
           </CardTitle>
         </CardHeader>
@@ -192,10 +202,12 @@ export default function BlueprintPage() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="border-gray-100">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Puzzle className="h-5 w-5 text-indigo-600" />
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+              <Puzzle className="h-4 w-4 text-white" />
+            </div>
             Recommended Integrations
           </CardTitle>
         </CardHeader>
@@ -213,12 +225,12 @@ export default function BlueprintPage() {
           Back to Store
         </Button>
         {!isApproved ? (
-          <Button onClick={approveBlueprint} disabled={approving} size="lg" className="gap-2">
+          <Button onClick={approveBlueprint} disabled={approving} size="lg" className="gap-2 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg shadow-green-500/25 btn-shine">
             {approving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
             {approving ? "Approving..." : "Approve Blueprint"}
           </Button>
         ) : (
-          <Button onClick={() => router.push(`/dashboard/stores/${id}/products`)} size="lg" className="gap-2">
+          <Button onClick={() => router.push(`/dashboard/stores/${id}/products`)} size="lg" className="gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/25 btn-shine">
             Next: Select Products
           </Button>
         )}
