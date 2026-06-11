@@ -1,0 +1,453 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum SubscriptionPlan {
+  FREE
+  STARTER
+  PRO
+  AGENCY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  TRIALING
+}
+
+enum StorePlatform {
+  SHOPIFY
+  WOOCOMMERCE
+  CUSTOM
+}
+
+enum StoreType {
+  ONE_PRODUCT
+  NICHE
+  GENERAL
+}
+
+enum BrandStyle {
+  LUXURY
+  MINIMALIST
+  PLAYFUL
+  TECH
+  FEMININE
+  MASCULINE
+  ECO_FRIENDLY
+  MODERN
+  VINTAGE
+}
+
+enum TicketLevel {
+  LOW
+  MID
+  HIGH
+}
+
+enum FulfillmentType {
+  MANUAL
+  AUTO
+  DROPSHIP
+  POD
+}
+
+enum StoreStatus {
+  DRAFT
+  QUESTIONNAIRE_COMPLETE
+  BLUEPRINT_GENERATED
+  BLUEPRINT_APPROVED
+  BUILDING
+  READY
+  LIVE
+}
+
+enum ProductStatus {
+  SUGGESTED
+  SELECTED
+  REJECTED
+  LIVE
+  ARCHIVED
+}
+
+enum IntegrationCategory {
+  PAYMENTS
+  ANALYTICS
+  MARKETING
+  CONVERSION
+  FULFILLMENT
+  SUPPORT
+  SEO
+}
+
+enum IntegrationStatus {
+  RECOMMENDED
+  CONNECTED
+  DISCONNECTED
+  ERROR
+}
+
+enum AIAssetType {
+  STORE_NAME
+  LOGO_CONCEPT
+  BRAND_COLORS
+  HOMEPAGE_COPY
+  PRODUCT_DESCRIPTION
+  SEO_TITLE
+  SEO_META
+  EMAIL_TEMPLATE
+  AD_COPY
+  POLICY
+  BLOG_POST
+  TIKTOK_SCRIPT
+  FAQ_CONTENT
+}
+
+enum OptimizationCategory {
+  STORE_READINESS
+  PRODUCT_OPPORTUNITY
+  SEO
+  CONVERSION
+  SPEED
+  TRUST
+  MARKETING
+}
+
+model User {
+  id            String           @id @default(cuid())
+  email         String           @unique
+  name          String?
+  passwordHash  String?
+  role          Role             @default(USER)
+  avatarUrl     String?
+  googleId      String?          @unique
+  emailVerified DateTime?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  subscription    Subscription?
+  storeProjects   StoreProject[]
+  sessions        Session[]
+  auditLogs       AuditLog[]
+  apiKeys         ApiKey[]
+  notifications   Notification[]
+  aiUsageLogs     AIUsageLog[]
+  refreshTokens   RefreshToken[]
+
+  @@index([email])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ipAddress    String?
+  userAgent    String?
+  lastActiveAt DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+}
+
+model ApiKey {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  keyHash   String   @unique
+  name      String
+  lastUsed  DateTime?
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Subscription {
+  id                String             @id @default(cuid())
+  userId            String             @unique
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan              SubscriptionPlan   @default(FREE)
+  status            SubscriptionStatus @default(ACTIVE)
+  paypalSubscriptionId String?
+  paypalPlanId      String?
+  currentPeriodStart DateTime?
+  currentPeriodEnd  DateTime?
+  cancelAtPeriodEnd Boolean?
+  trialEndsAt       DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  billingHistory BillingHistory[]
+}
+
+model BillingHistory {
+  id             String   @id @default(cuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  amount         Float
+  currency       String   @default("USD")
+  paypalOrderId  String?
+  status         String
+  description    String?
+  createdAt      DateTime @default(now())
+
+  @@index([subscriptionId])
+}
+
+model Niche {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  productCandidates ProductCandidate[]
+}
+
+model StoreProject {
+  id              String        @id @default(cuid())
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  platform        StorePlatform @default(SHOPIFY)
+  storeType       StoreType     @default(NICHE)
+  status          StoreStatus   @default(DRAFT)
+  customDomain    String?
+  shopifyUrl      String?
+ wooCommerceUrl   String?
+  liveUrl         String?
+  blueprintData   Json?
+  settings        Json?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  questionnaireAnswers QuestionnaireAnswer[]
+  selectedProducts     SelectedProduct[]
+  storePages           StorePage[]
+  integrations         Integration[]
+  aiRecommendations    AIRecommendation[]
+  optimizationScores   OptimizationScore[]
+  marketingAssets      MarketingAsset[]
+
+  @@index([userId])
+}
+
+model QuestionnaireAnswer {
+  id              String       @id @default(cuid())
+  storeProjectId  String
+  storeProject    StoreProject @relation(fields: [storeProjectId], references: [id], onDelete: Cascade)
+  questionKey     String
+  questionText    String
+  answerValue     Json
+  answeredAt      DateTime     @default(now())
+
+  @@index([storeProjectId])
+  @@unique([storeProjectId, questionKey])
+}
+
+model ProductCandidate {
+  id               String     @id @default(cuid())
+  nicheId          String?
+  niche            Niche?     @relation(fields: [nicheId], references: [id])
+  name             String
+  supplierUrl      String?
+  costPrice        Float
+  recommendedPrice Float
+  estimatedMargin  Float
+  shippingTimeDays Int?
+  shippingCost     Float?
+  images           Json?
+  description      String?
+  seoKeywords      Json?
+  targetAudience   String?
+  winningAngle     String?
+  adHook           String?
+  upsellId         String?
+  riskScore        Float?
+  trendScore       Float?
+  competitionScore Float?
+  opportunityScore Float?
+  supplierRating   Float?
+  saturationScore  Float?
+  seasonalDemand   String?
+  tiktokPotential  Float?
+  instagramPotential Float?
+  isActive         Boolean    @default(true)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  selectedProducts SelectedProduct[]
+
+  @@unique([nicheId, name])
+  @@index([nicheId])
+  @@index([opportunityScore])
+}
+
+model SelectedProduct {
+  id              String          @id @default(cuid())
+  storeProjectId  String
+  storeProject    StoreProject    @relation(fields: [storeProjectId], references: [id], onDelete: Cascade)
+  productCandidateId String?
+  productCandidate ProductCandidate? @relation(fields: [productCandidateId], references: [id])
+  customName      String?
+  customDescription String?
+  sellingPrice    Float
+  costPrice       Float
+  status          ProductStatus   @default(SELECTED)
+  sortOrder       Int             @default(0)
+  isFeatured      Boolean         @default(false)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([storeProjectId])
+}
+
+model StorePage {
+  id             String       @id @default(cuid())
+  storeProjectId String
+  storeProject   StoreProject @relation(fields: [storeProjectId], references: [id], onDelete: Cascade)
+  slug           String
+  title          String
+  content        Json?
+  seoTitle       String?
+  seoDescription String?
+  isPublished    Boolean      @default(false)
+  sortOrder      Int          @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([storeProjectId, slug])
+  @@index([storeProjectId])
+}
+
+model Integration {
+  id             String             @id @default(cuid())
+  storeProjectId String
+  storeProject   StoreProject       @relation(fields: [storeProjectId], references: [id], onDelete: Cascade)
+  name           String
+  category       IntegrationCategory
+  status         IntegrationStatus  @default(RECOMMENDED)
+  config         Json?
+  apiKeyEnc      String?
+  installedAt    DateTime?
+  lastSyncAt     DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@unique([storeProjectId, name])
+  @@index([storeProjectId])
+}
+
+model AIRecommendation {
+  id             String       @id @default(cuid())
+  storeProjectId String
+  storeProject   StoreProject @relation(fields: [storeProjectId], references: [id], onDelete: Cascade)
+  agentType      String
+  assetType      AIAssetType
+  content        Json
+  isAccepted     Boolean?
+  createdAt      DateTime     @default(now())
+
+  @@index([storeProjectId])
+}
+
+model OptimizationScore {
+  id             String                @id @default(cuid())
+  storeProjectId String
+  storeProject   StoreProject          @relation(fields: [storeProjectId], references: [id], onDelete: Cascade)
+  category       OptimizationCategory
+  score          Float
+  maxScore       Float                 @default(100)
+  breakdown      Json?
+  recommendations Json?
+  calculatedAt   DateTime              @default(now())
+
+  @@unique([storeProjectId, category])
+  @@index([storeProjectId])
+}
+
+model MarketingAsset {
+  id             String       @id @default(cuid())
+  storeProjectId String
+  storeProject   StoreProject @relation(fields: [storeProjectId], references: [id], onDelete: Cascade)
+  assetType      AIAssetType
+  title          String
+  content        Json
+  platform       String?
+  isApproved     Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([storeProjectId])
+}
+
+model AIUsageLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  agentType String
+  tokens    Int
+  model     String
+  duration  Int?
+  success   Boolean  @default(true)
+  error     String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  resource  String
+  resourceId String?
+  details   Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+}
