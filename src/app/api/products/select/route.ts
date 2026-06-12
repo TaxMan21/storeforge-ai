@@ -4,6 +4,7 @@ import { requirePaidPlan, AuthError } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { productSelectionSchema } from "@/lib/validation";
 import { ok, fail, parseBody, serverError } from "@/lib/api/response";
+import { getPlanLimits } from "@/lib/subscription-limits";
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,6 +29,15 @@ export async function POST(request: NextRequest) {
 
     if (!project) return fail("Project not found", 404);
 
+    const subscription = await prisma.subscription.findUnique({ where: { userId: user.id } });
+    const plan = subscription?.plan || "FREE";
+    const limits = getPlanLimits(plan);
+
+    const productCount = await prisma.selectedProduct.count({ where: { storeProjectId } });
+    if (productCount >= limits.productsPerStore) {
+      return fail(`You've reached the maximum of ${limits.productsPerStore} products for your ${plan} plan. Please upgrade.`, 403);
+    }
+
     let costPrice = 0;
     if (productCandidateId) {
       const candidate = await prisma.productCandidate.findUnique({
@@ -51,7 +61,7 @@ export async function POST(request: NextRequest) {
       include: { productCandidate: true },
     });
 
-    return ok({ product: selected }, 201);
+    return ok({ product: selected, usage: { current: productCount + 1, limit: limits.productsPerStore } }, 201);
   } catch (error) {
     if (error instanceof AuthError) return fail(error.message, error.status);
     console.error("[Products/Select]", error);

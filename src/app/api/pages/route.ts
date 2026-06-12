@@ -4,6 +4,7 @@ import { requirePaidPlan, AuthError } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { ok, fail, serverError } from "@/lib/api/response";
 import { pageUpdateSchema } from "@/lib/validation";
+import { getPlanLimits } from "@/lib/subscription-limits";
 
 const DEFAULT_PAGES = [
   { slug: "home", title: "Home", sortOrder: 0 },
@@ -34,14 +35,26 @@ export async function POST(request: NextRequest) {
     });
     if (!project) return fail("Project not found", 404);
 
+    const subscription = await prisma.subscription.findUnique({ where: { userId: user.id } });
+    const plan = subscription?.plan || "FREE";
+    const limits = getPlanLimits(plan);
+
     const existingPages = await prisma.storePage.findMany({
       where: { storeProjectId },
       select: { slug: true },
     });
 
     const existingSlugs = new Set(existingPages.map((p) => p.slug));
-
     const pagesToCreate = DEFAULT_PAGES.filter((p) => !existingSlugs.has(p.slug));
+
+    const totalAfterCreate = existingPages.length + pagesToCreate.length;
+    if (totalAfterCreate > limits.pagesPerStore) {
+      const allowed = limits.pagesPerStore - existingPages.length;
+      if (allowed <= 0) {
+        return fail(`You've reached the maximum of ${limits.pagesPerStore} pages for your ${plan} plan. Please upgrade.`, 403);
+      }
+      return fail(`Your ${plan} plan allows ${limits.pagesPerStore} pages max. You can create ${allowed} more. Please upgrade for more.`, 403);
+    }
 
     if (pagesToCreate.length > 0) {
       await prisma.storePage.createMany({

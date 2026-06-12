@@ -4,6 +4,7 @@ import { requirePaidPlan, AuthError } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { ok, fail, serverError } from "@/lib/api/response";
 import { defaultIntegrations } from "@/lib/integrations-config";
+import { getPlanLimits } from "@/lib/subscription-limits";
 
 export async function GET(request: NextRequest) {
   try {
@@ -61,6 +62,15 @@ export async function POST(request: NextRequest) {
       where: { id: storeProjectId, userId: user.id },
     });
     if (!project) return fail("Project not found", 404);
+
+    const subscription = await prisma.subscription.findUnique({ where: { userId: user.id } });
+    const plan = subscription?.plan || "FREE";
+    const limits = getPlanLimits(plan);
+
+    const integrationCount = await prisma.integration.count({ where: { storeProjectId } });
+    if (integrationCount >= limits.integrationsPerStore) {
+      return fail(`You've reached the maximum of ${limits.integrationsPerStore} integrations for your ${plan} plan. Please upgrade.`, 403);
+    }
 
     const integration = await prisma.integration.upsert({
       where: { storeProjectId_name: { storeProjectId, name } },

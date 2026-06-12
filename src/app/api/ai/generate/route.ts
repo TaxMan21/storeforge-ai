@@ -3,6 +3,7 @@ import { getAuthPayload } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { ok, fail, serverError } from "@/lib/api/response";
 import { runAgent } from "@/lib/ai/agents";
+import { getPlanLimits } from "@/lib/subscription-limits";
 
 export async function POST(request: NextRequest) {
   try {
@@ -40,6 +41,12 @@ export async function POST(request: NextRequest) {
     });
 
     const plan = subscription?.plan || "FREE";
+    const limits = getPlanLimits(plan);
+
+    if (!limits.aiAgentsAccess.includes(agentType)) {
+      return fail(`Your ${plan} plan does not include the ${agentType} agent. Please upgrade to access this agent.`, 403);
+    }
+
     const usageToday = await prisma.aIUsageLog.count({
       where: {
         userId: payload.sub,
@@ -47,9 +54,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const limits: Record<string, number> = { FREE: 10, STARTER: 100, PRO: 500, AGENCY: 9999 };
-    if (usageToday >= (limits[plan] || 10)) {
-      return fail("AI usage limit reached for today. Please upgrade your plan.", 403);
+    if (usageToday >= limits.aiGenerationsPerDay) {
+      return fail(`AI usage limit reached for today (${limits.aiGenerationsPerDay} for ${plan} plan). Please upgrade or try again tomorrow.`, 403);
     }
 
     const context = {
@@ -107,6 +113,7 @@ export async function POST(request: NextRequest) {
       tokens: result.tokens,
       model: result.model,
       duration,
+      usage: { current: usageToday + 1, limit: limits.aiGenerationsPerDay },
     });
   } catch (error) {
     console.error("[AI/Generate]", error);
